@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy:
-    environment: production
+    environment: secrets
     runs-on: ubuntu-latest
 
     steps:
