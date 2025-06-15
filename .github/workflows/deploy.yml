@@ -1,13 +1,17 @@
+name: Deploy web
 on:
   push:
     branches: [ main ]
 
 jobs:
   deploy:
+    environment: production
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        timeout-minutes: 30
 
       - name: Add SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -15,11 +19,32 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-      - name: Run deploy script
+      - name: Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-            cd ${{ secrets.PROJECT_DIR }} &&
-            git pull origin main &&
-            docker-compose down &&
+          set -euo pipefail
+
+          echo "🔄 Connecting to server..."
+          ssh -o ConnectTimeout=10 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            set -e
+            echo '📂 Changing to project dir...'
+            cd ${{ secrets.PROJECT_DIR }}
+
+            echo '🔄 Updating code...'
+            git fetch --all
+            git reset --hard origin/main
+
+            echo '🐳 Rebuilding containers...'
+            docker-compose down --remove-orphans
+            docker-compose pull
             docker-compose up --build -d
+
+            echo '✅ Deploy completed!'
+          "
+
+      - name: Verify
+        run: |
+          echo "⏳ Waiting for services to start..."
+          sleep 10
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            curl -sSf http://localhost/api/health || exit 1
           "
