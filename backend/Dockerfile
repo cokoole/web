@@ -1,11 +1,13 @@
 FROM golang:1.24 as builder
 
-WORKDIR /web
+WORKDIR /app
 
 COPY . .
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o /web
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main
+
 FROM alpine:latest
-COPY --from=builder /web /web
+WORKDIR /app
+COPY --from=builder /app/main /app/main
 EXPOSE 8080
-CMD [ "/web" ]
+CMD [ "/app/main" ]
