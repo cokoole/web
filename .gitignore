@@ -1,0 +1,25 @@
+# ignore bin file Go
+bin/
+dist/
+
+# ignore file dependencies Go
+vendor/
+go.sum
+
+# ignore IDE cache and system files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Ignore node_modules (if npm will be used)
+node_modules/
+
+# Ignore the generated Docker files
+*.dockerignore
+*.env
+
+# Ignore logs and temporary files
+*.log
+tmp/
