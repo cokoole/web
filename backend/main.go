@@ -7,7 +7,7 @@ import (
 
 func main() {
 	http.HandleFunc("/api/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello world")
+		fmt.Fprintf(w, "Hello world!")
 	})
 
 	fmt.Println("Server start in :8080")
